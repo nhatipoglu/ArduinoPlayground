@@ -3,8 +3,8 @@
 AirQualityAlert::AirQualityAlert(int sensorPin, int buzzerPin)
     : sensorPin_(sensorPin),
       buzzerPin_(buzzerPin),
-  warningThresholdPercent_(45),
-  dangerThresholdPercent_(75),
+      warningThresholdPercent_(45),
+      dangerThresholdPercent_(75),
       beepDurationMs_(90),
       lastBeepTimeMs_(0),
       buzzerOn_(false) {}

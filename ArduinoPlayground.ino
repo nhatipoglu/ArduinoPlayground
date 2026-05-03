@@ -1,10 +1,22 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-#include "AirQualityAlert.h"
+#include "src/air_quality_alert/AirQualityAlert.h"
+#include "src/distance_alert/DistanceAlert.h"
 
 const int airQualitySensorPin = A0;
-const int buzzerPin = 9;
+const int airQualityBuzzerPin = 9;
+
+const int distanceTrigPin = 11;
+const int distanceEchoPin = 12;
+const int distanceBuzzerPin = 8;
+
+enum DemoMode {
+  DEMO_AIR_QUALITY,
+  DEMO_DISTANCE,
+};
+
+const DemoMode activeDemo = DEMO_AIR_QUALITY;
 
 const int lcdPrimaryAddress = 0x27;
 const int lcdFallbackAddress = 0x3F;
@@ -17,7 +29,12 @@ unsigned long lastLcdUpdateMs = 0;
 
 const unsigned long lcdUpdateIntervalMs = 300;
 
-AirQualityAlert airQualityAlert(airQualitySensorPin, buzzerPin);
+AirQualityAlert airQualityAlert(airQualitySensorPin, airQualityBuzzerPin);
+DistanceAlert distanceAlert(distanceTrigPin, distanceEchoPin, distanceBuzzerPin);
+
+const char* getDemoLabel() {
+  return activeDemo == DEMO_AIR_QUALITY ? "Air Quality" : "Distance";
+}
 
 bool isI2cDeviceAvailable(int address) {
   Wire.beginTransmission(address);
@@ -44,20 +61,34 @@ void showStartupScreen(bool hasPrimary) {
 
   lcd->clear();
   lcd->setCursor(0, 0);
-  lcd->print("LCD START OK");
+  lcd->print("Demo hazir");
   lcd->setCursor(0, 1);
-  lcd->print(hasPrimary ? "ADDR 0x27" : "ADDR 0x3F");
+  lcd->print(activeDemo == DEMO_AIR_QUALITY ? "Hava Kalitesi " : "Mesafe Alarmi ");
   delay(3000);
+
+  lcd->clear();
+  lcd->setCursor(0, 0);
+  lcd->print(hasPrimary ? "LCD 0x27 OK    " : "LCD 0x3F OK    ");
+  lcd->setCursor(0, 1);
+  lcd->print("Secim kaydedildi");
+  delay(1500);
 }
 
 void setup() {
   Serial.begin(9600);
   Wire.begin();
-  airQualityAlert.begin();
+
+  if (activeDemo == DEMO_AIR_QUALITY) {
+    airQualityAlert.begin();
+  } else {
+    distanceAlert.begin();
+  }
 
   bool hasPrimary = isI2cDeviceAvailable(lcdPrimaryAddress);
   bool hasFallback = isI2cDeviceAvailable(lcdFallbackAddress);
 
+  Serial.print("Active demo: ");
+  Serial.println(getDemoLabel());
   Serial.println("LCD check start");
   Serial.print("0x27: ");
   Serial.println(hasPrimary ? "OK" : "not found");
@@ -82,7 +113,45 @@ void setup() {
 }
 
 void loop() {
-  AirQualityReading reading = airQualityAlert.update();
+  if (activeDemo == DEMO_AIR_QUALITY) {
+    AirQualityReading reading = airQualityAlert.update();
+
+    if (!lcdAvailable) {
+      return;
+    }
+
+    unsigned long now = millis();
+    if (now - lastLcdUpdateMs < lcdUpdateIntervalMs) {
+      return;
+    }
+
+    lastLcdUpdateMs = now;
+
+    lcd->setCursor(0, 0);
+    if (reading.hasMeasurement) {
+      lcd->print("Hava:         ");
+      lcd->setCursor(6, 0);
+      lcd->print(reading.qualityPercent);
+      lcd->print("%   ");
+    } else {
+      lcd->print("Sensor yok    ");
+    }
+
+    lcd->setCursor(0, 1);
+    if (!reading.hasMeasurement) {
+      lcd->print("Sensor bekliyor");
+    } else if (reading.dangerActive) {
+      lcd->print("Tehlike: Kirli ");
+    } else if (reading.alertActive) {
+      lcd->print("Uyari: Havaland");
+    } else {
+      lcd->print("Durum: Temiz   ");
+    }
+
+    return;
+  }
+
+  DistanceReading reading = distanceAlert.update();
 
   if (!lcdAvailable) {
     return;
@@ -96,23 +165,21 @@ void loop() {
   lastLcdUpdateMs = now;
 
   lcd->setCursor(0, 0);
-  if (reading.hasMeasurement) {
-    lcd->print("Hava:         ");
-    lcd->setCursor(6, 0);
-    lcd->print(reading.qualityPercent);
-    lcd->print("%   ");
+  if (!reading.hasMeasurement) {
+    lcd->print("Mesafe yok    ");
   } else {
-    lcd->print("Sensor yok    ");
+    lcd->print("Mesafe:       ");
+    lcd->setCursor(8, 0);
+    lcd->print(reading.distanceCm, 1);
+    lcd->print("cm ");
   }
 
   lcd->setCursor(0, 1);
   if (!reading.hasMeasurement) {
-    lcd->print("Sensor bekliyor");
-  } else if (reading.dangerActive) {
-    lcd->print("Tehlike: Kirli ");
+    lcd->print("HC-SR04 bekliyor");
   } else if (reading.alertActive) {
-    lcd->print("Uyari: Havaland");
+    lcd->print("Yakin: Bip aktif");
   } else {
-    lcd->print("Durum: Temiz   ");
+    lcd->print("Durum: Guvenli ");
   }
 }

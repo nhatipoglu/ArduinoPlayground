@@ -4,10 +4,10 @@ DistanceAlert::DistanceAlert(int trigPin, int echoPin, int buzzerPin)
     : trigPin_(trigPin),
       echoPin_(echoPin),
       buzzerPin_(buzzerPin),
-  alertDistanceCm_(10.0),
-  beepDurationMs_(60),
-  lastBeepTimeMs_(0),
-  buzzerOn_(false) {}
+      alertDistanceCm_(10.0),
+      beepDurationMs_(60),
+      lastBeepTimeMs_(0),
+      buzzerOn_(false) {}
 
 void DistanceAlert::begin() {
   pinMode(trigPin_, OUTPUT);

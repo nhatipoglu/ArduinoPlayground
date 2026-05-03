@@ -1,147 +1,176 @@
-# Demo
+# ArduinoPlayground
 
-Bu proje, HC-SR04 ultrasonik mesafe sensoru ile olcum yapar, nesne yaklastikca buzzer daha sik bipler ve I2C 16x2 LCD ekranda mesafe/durum gosterir.
+Bu repo bir Arduino demo alani. Ana sketch su anda hava kalitesi uyarisi senaryosunu calistiriyor, ama alternatif ozellikler de ayri klasorlerde tutuluyor. Amac, her ozelligin kendi kodu ve kendi kucuk README'si ile bulunabilir olmasi.
 
-## Davranis
+## Proje Yapisi
 
-- `10 cm` ustunde buzzer susar.
-- `10 cm` altinda buzzer aralikli bipler.
-- Mesafe azaldikca bip araligi kisalir.
-- Olcum alinamazsa seri porta `No measurement` yazar.
-- Olcum varsa seri porta `Distance: <deger> cm` yazar.
-- LCD ilk satirda mesafeyi, ikinci satirda durum bilgisini gosterir.
+```text
+ArduinoPlayground/
+|- ArduinoPlayground.ino
+|- README.md
+|- src/
+|  |- air_quality_alert/
+|  |  |- AirQualityAlert.h
+|  |  |- AirQualityAlert.cpp
+|  |  |- README.md
+|  \- distance_alert/
+|     |- DistanceAlert.h
+|     |- DistanceAlert.cpp
+|     \- README.md
+|- build/
+\- .vscode/
+```
 
-## Pin Baglantilari
+## Nereden Baslanir
 
-Kod icindeki pinler:
+- Ana giris noktasi `ArduinoPlayground.ino` dosyasidir.
+- Aktif ozellik bu dosyada include edilmis olan moduldur.
+- Her ozelligin detaylari kendi klasorundeki README icindedir.
 
-- `trigPin = 11`
-- `echoPin = 12`
-- `buzzerPin = 8`
-- `lcdAddress = 0x27`
+Bu projede su anda:
 
-Ornek baglanti:
+- aktif demo: `src/air_quality_alert/`
+- alternatif modul: `src/distance_alert/`
 
-- HC-SR04 `VCC` -> Arduino `5V`
-- HC-SR04 `GND` -> Arduino `GND`
-- HC-SR04 `TRIG` -> Arduino `D11`
-- HC-SR04 `ECHO` -> Arduino `D12`
-- Buzzer `+` -> Arduino `D8`
-- Buzzer `-` -> Arduino `GND`
-- I2C LCD `GND` -> Arduino `GND`
-- I2C LCD `VCC` -> Arduino `5V`
-- I2C LCD `SDA` -> Arduino Uno `A4` veya kart uzerindeki `SDA`
-- I2C LCD `SCL` -> Arduino Uno `A5` veya kart uzerindeki `SCL`
+## Ozellikler
 
-Not: Arduino Uno'da I2C hatti `D1` ve `D2` degil, `A4/A5` pinleridir. LCD'yi `1` ve `2` numarali dijital pinlere bagladiysan ekranda veri gelmez.
+### Air Quality Alert
 
-## Gereksinimler
+Bu mod ul analog hava kalitesi sensorunden veri alip sonucu yuzdeye cevirir, gerekirse buzzer ile uyari verir ve LCD ile seri monitore durum basar.
 
-- Arduino CLI kurulu olmali
-- Arduino AVR core kurulu olmali
-- Hedef kart bu proje icin `Arduino Uno`
+Detaylar icin: `src/air_quality_alert/README.md`
 
-Kurulu cekirdekleri gormek icin:
+Kisa teknik ozet:
+
+- sensor pini: `A0`
+- buzzer pini: `D9`
+- LCD I2C adres denemeleri: `0x27` ve `0x3F`
+- seri hiz: `9600`
+
+### Distance Alert
+
+Bu mod ul HC-SR04 ile mesafe olcer ve nesne yaklastikca buzzeri daha sik caldirir. Su an aktif sketch icinde bagli degil ama alternatif demo mantigi olarak tutuluyor.
+
+Detaylar icin: `src/distance_alert/README.md`
+
+## Gerekli Olanlar
+
+Projeyi terminalden derlemek ve karta yuklemek icin bunlar lazim:
+
+- `arduino-cli`
+- Arduino AVR core
+- Arduino Uno veya Uno ile uyumlu bir kart
+- USB kablosu
+- Air Quality Alert icin analog hava kalitesi sensoru, buzzer, I2C LCD
+
+Yuklu core'lari kontrol etmek icin:
 
 ```bash
 arduino-cli core list
 ```
 
-## Derleme
-
-Proje klasorunde su komutu calistir:
+Eger AVR core yoksa tipik kurulum:
 
 ```bash
-arduino-cli compile --fqbn arduino:avr:uno --build-path "$PWD/build" "$PWD"
+arduino-cli core install arduino:avr
 ```
 
-Basarili olursa derleme boyutu ve RAM kullanimi terminalde gorunur.
-Derleme ciktilari proje icindeki `build/` klasorune yazilir.
+## Karti Nasil Bulursun
 
-Baslica build dosyalari:
-
-- `build/Demo.ino.hex`: karta yuklenen ana firmware cikti dosyasi
-- `build/Demo.ino.elf`: sembol bilgisi iceren derleme cikti dosyasi
-- `build/Demo.ino.with_bootloader.hex`: bootloader dahil hex cikti
-
-## Karti Bulma
-
-Bagli kartlari gormek icin:
+Karti USB ile bagladiktan sonra terminalde:
 
 ```bash
 arduino-cli board list
 ```
 
-Bu komut port bilgisini verir. Ornek portlar:
+Bu komut portu gosterir. Linux tarafinda genelde su tipte gorunur:
 
-- Linux: `/dev/ttyUSB0`
-- Linux: `/dev/ttyACM0`
+- `/dev/ttyUSB0`
+- `/dev/ttyACM0`
 
-## Karta Yukleme
+Klon kartlarda kart adi bazen tam taninmasa da port dogruysa upload yine calisabilir.
 
-Portu ogrendikten sonra yukleme komutu:
+## Build Nasil Alinir
+
+Repo kokunde terminal acip su komutu calistir:
+
+```bash
+arduino-cli compile --fqbn arduino:avr:uno --build-path "$PWD/build" "$PWD"
+```
+
+Basarili derlemede boyle bir ozet gorursun:
+
+```text
+Sketch uses ... bytes of program storage space.
+Global variables use ... bytes of dynamic memory.
+```
+
+Derleme ciktilari `build/` klasorune yazilir. En kritik dosyalar:
+
+- `build/ArduinoPlayground.ino.hex`
+- `build/ArduinoPlayground.ino.elf`
+- `build/ArduinoPlayground.ino.with_bootloader.hex`
+
+## Koda Karta Nasil Atarsin
+
+Once portu bul, sonra upload komutunu ver:
 
 ```bash
 arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno --input-dir "$PWD/build" "$PWD"
 ```
 
-Port farkliysa `/dev/ttyUSB0` kismini kendi portunla degistir.
+Portun farkliysa `/dev/ttyUSB0` yerine kendi portunu yaz.
 
-## Seri Monitor
+Tipik akis:
 
-Kod `9600` baud ile seri porta mesafe bilgisini yaziyor. I2C LCD takili olmasa bile seri monitor ile izlemek icin:
+1. `arduino-cli board list`
+2. `arduino-cli compile --fqbn arduino:avr:uno --build-path "$PWD/build" "$PWD"`
+3. `arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno --input-dir "$PWD/build" "$PWD"`
+
+## Terminalden Ciktiya Nasil Bakilir
+
+Kod seri porta `9600` baud ile log basiyor. Terminalden izlemek icin:
 
 ```bash
 arduino-cli monitor -p /dev/ttyUSB0 -c baudrate=9600
 ```
 
-Ornek cikti:
+Air Quality Alert aktifken ornek ciktilar su formda olur:
 
 ```text
-Distance: 8.42 cm
-Distance: 6.91 cm
-Distance: 4.33 cm
+LCD check start
+0x27: OK
+0x3F: not found
+Air raw: 412 quality: 40% status: TEMIZ
+Air raw: 690 quality: 67% status: UYARI
+Air raw: 820 quality: 80% status: TEHLIKE
 ```
 
-## Dosyalar
-
-- `Demo.ino`: ana Arduino sketch giris noktasi, I2C LCD baslatma ve ekran guncelleme burada
-- `DistanceAlert.h`: `DistanceAlert` sinifinin bildirimi
-- `DistanceAlert.cpp`: sensorden olcum alma ve buzzer davranisinin asil mantigi
-- `.vscode/c_cpp_properties.json`: bu workspace icin IntelliSense ayarlari
-- `.vscode/tasks.json`: build, upload ve monitor gorevleri
-- `build/`: derleme ciktilarinin yazildigi klasor
-
-## Kod Yapisi
-
-Proje artik tek dosya yerine moduler yapida:
-
-- `Demo.ino` sadece sistemi baslatir, I2C LCD'yi hazirlar ve dongude `distanceAlert.update()` cagirir.
-- `DistanceAlert.h` sinif arayuzunu tutar.
-- `DistanceAlert.cpp` `measurePulseDuration()`, `silenceBuzzer()` ve `beepByDistance()` gibi metotlarla asil davranisi uygular.
-
-Bu yapi kod buyudukce yeni sensor veya alarm mantiklarini ayirmayi kolaylastirir.
+Monitor'den cikmak icin genelde `Ctrl+C` yeterlidir.
 
 ## VS Code Gorevleri
 
-VS Code icinden `Run Task` ile su gorevleri calistirabilirsin:
+Terminal komutlarini elle yazmak istemezsen workspace gorevleri zaten hazir:
 
 - `Arduino: Build Uno`
 - `Arduino: Upload Uno`
 - `Arduino: Monitor`
 
-`Upload` ve `Monitor` gorevleri port bilgisini sorar. Varsayilan olarak `/dev/ttyUSB0` gelir.
+`Upload` ve `Monitor` gorevleri portu sorar. Ayni isleri terminal komutlarinin paketlenmis hali olarak dusunebilirsin.
 
-Tipik akisi su sekilde kullanabilirsin:
+## Moduller Nasil Bulunur
 
-1. `Arduino: Build Uno`
-2. `Arduino: Upload Uno`
-3. `Arduino: Monitor`
+Yeni gelen biri icin en hizli rota su:
+
+1. `ArduinoPlayground.ino` dosyasina bak.
+2. Hangi modulu include ettigini gor.
+3. Ilgili `src/<ozellik>/README.md` dosyasini oku.
+4. Sonra ayni klasordeki `.h` ve `.cpp` dosyalarina gir.
+
+Bu sayede hangi ozelligin aktif oldugunu ve mantigin nerede yasadigini hizli bulursun.
 
 ## Notlar
 
-- Farkli Arduino kart kullanacaksan `--fqbn` degerini degistirmen gerekir.
-- Farkli kart kullanirsan `.vscode/c_cpp_properties.json` icindeki IntelliSense ayarlarini da karta gore guncellemek gerekebilir.
-- Buzzer davranisini degistirmek icin `DistanceAlert.cpp` icindeki `alertDistanceCm_` ve `beepDurationMs_` degerlerini ayarlayabilirsin.
-- LCD hic yazmiyorsa yaygin I2C adresleri `0x27` ve `0x3F` olur; gerekiyorsa `Demo.ino` icindeki `lcdAddress` degerini degistir.
-- Klon kartlarda `arduino-cli board list` ciktisinda kart bazen `Unknown` gorunebilir; port dogruysa `arduino:avr:uno` ile yukleme yine calisabilir.
+- Farkli kart kullanirsan `--fqbn` degerini degistirmen gerekir.
+- LCD hic veri gostermiyorsa ilk kontrol edilmesi gereken adresler `0x27` ve `0x3F` olur.
+- `src/` altindaki moduller Arduino CLI tarafinda derlemeye dahil edilir; bu yuzden ozellikleri klasorleyip duzenli tutmak kolaydir.
