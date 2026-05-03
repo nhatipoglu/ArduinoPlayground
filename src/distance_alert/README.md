@@ -21,4 +21,8 @@ Bu ozellik HC-SR04 ultrasonik sensor ile mesafe olcup nesne yaklastikca buzzer u
 
 ## Not
 
-Bu modulun tekrar aktif edilmesi icin ana sketch icinde uygun include, nesne olusturma ve `loop()` entegrasyonu yapilmasi yeterlidir.
+Bu modul artik ana sketch icinde hazir durumda. Aktif etmek icin [ArduinoPlayground.ino](ArduinoPlayground.ino) icindeki secimi soyle degistirmen yeterlidir:
+
+```cpp
+const DemoMode activeDemo = DEMO_DISTANCE;
+```

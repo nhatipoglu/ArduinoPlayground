@@ -1,6 +1,6 @@
 # ArduinoPlayground
 
-Bu repo bir Arduino demo alani. Ana sketch su anda hava kalitesi uyarisi senaryosunu calistiriyor, ama alternatif ozellikler de ayri klasorlerde tutuluyor. Amac, her ozelligin kendi kodu ve kendi kucuk README'si ile bulunabilir olmasi.
+Bu repo bir Arduino demo alani. Ana sketch icinde artik secilebilir demo modu var; hava kalitesi ve mesafe alarmi ayni proje icinden secilip calistirilabiliyor. Her ozelligin kendi kodu ve kendi kucuk README'si ayri klasorde tutuluyor.
 
 ## Proje Yapisi
 
@@ -24,13 +24,29 @@ ArduinoPlayground/
 ## Nereden Baslanir
 
 - Ana giris noktasi `ArduinoPlayground.ino` dosyasidir.
-- Aktif ozellik bu dosyada include edilmis olan moduldur.
+- Aktif ozellik bu dosyadaki `activeDemo` sabiti ile secilir.
 - Her ozelligin detaylari kendi klasorundeki README icindedir.
 
-Bu projede su anda:
+Varsayilan durumda:
 
 - aktif demo: `src/air_quality_alert/`
-- alternatif modul: `src/distance_alert/`
+- alternatif demo: `src/distance_alert/`
+
+## Demo Secimi
+
+Aktif senaryo [ArduinoPlayground.ino](ArduinoPlayground.ino) icindeki `activeDemo` sabitinden secilir.
+
+```cpp
+const DemoMode activeDemo = DEMO_AIR_QUALITY;
+```
+
+Mesafe demosuna gecmek icin bunu soyle degistirmen yeterli:
+
+```cpp
+const DemoMode activeDemo = DEMO_DISTANCE;
+```
+
+Tekrar build alip karta yukledikten sonra secilen mod aktif olur.
 
 ## Ozellikler
 
@@ -47,11 +63,32 @@ Kisa teknik ozet:
 - LCD I2C adres denemeleri: `0x27` ve `0x3F`
 - seri hiz: `9600`
 
+Baglanti tablosu:
+
+| Bilesen | Arduino pini |
+| --- | --- |
+| Hava kalitesi sensor cikisi | `A0` |
+| Buzzer | `D9` |
+| I2C LCD SDA | `A4` |
+| I2C LCD SCL | `A5` |
+| LCD adresi | `0x27` veya `0x3F` |
+
 ### Distance Alert
 
 Bu mod ul HC-SR04 ile mesafe olcer ve nesne yaklastikca buzzeri daha sik caldirir. Su an aktif sketch icinde bagli degil ama alternatif demo mantigi olarak tutuluyor.
 
 Detaylar icin: `src/distance_alert/README.md`
+
+Baglanti tablosu:
+
+| Bilesen | Arduino pini |
+| --- | --- |
+| HC-SR04 TRIG | `D11` |
+| HC-SR04 ECHO | `D12` |
+| Buzzer | `D8` |
+| I2C LCD SDA | `A4` |
+| I2C LCD SCL | `A5` |
+| LCD adresi | `0x27` veya `0x3F` |
 
 ## Gerekli Olanlar
 
@@ -124,8 +161,9 @@ Portun farkliysa `/dev/ttyUSB0` yerine kendi portunu yaz.
 Tipik akis:
 
 1. `arduino-cli board list`
-2. `arduino-cli compile --fqbn arduino:avr:uno --build-path "$PWD/build" "$PWD"`
-3. `arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno --input-dir "$PWD/build" "$PWD"`
+2. Gerekirse [ArduinoPlayground.ino](ArduinoPlayground.ino) icinde `activeDemo` degerini degistir
+3. `arduino-cli compile --fqbn arduino:avr:uno --build-path "$PWD/build" "$PWD"`
+4. `arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno --input-dir "$PWD/build" "$PWD"`
 
 ## Terminalden Ciktiya Nasil Bakilir
 
@@ -138,6 +176,7 @@ arduino-cli monitor -p /dev/ttyUSB0 -c baudrate=9600
 Air Quality Alert aktifken ornek ciktilar su formda olur:
 
 ```text
+Active demo: Air Quality
 LCD check start
 0x27: OK
 0x3F: not found
@@ -147,6 +186,18 @@ Air raw: 820 quality: 80% status: TEHLIKE
 ```
 
 Monitor'den cikmak icin genelde `Ctrl+C` yeterlidir.
+
+Distance Alert aktifken benzer sekilde su tip loglar gorursun:
+
+```text
+Active demo: Distance
+LCD check start
+0x27: OK
+0x3F: not found
+Distance: 18.2 cm
+Distance: 9.4 cm
+Distance: 4.8 cm
+```
 
 ## VS Code Gorevleri
 
@@ -162,8 +213,8 @@ Terminal komutlarini elle yazmak istemezsen workspace gorevleri zaten hazir:
 
 Yeni gelen biri icin en hizli rota su:
 
-1. `ArduinoPlayground.ino` dosyasina bak.
-2. Hangi modulu include ettigini gor.
+1. [ArduinoPlayground.ino](ArduinoPlayground.ino) dosyasina bak.
+2. `activeDemo` degerinin ne oldugunu gor.
 3. Ilgili `src/<ozellik>/README.md` dosyasini oku.
 4. Sonra ayni klasordeki `.h` ve `.cpp` dosyalarina gir.
 

@@ -21,4 +21,10 @@ Bu ozellik analog hava kalitesi sensorunden okuma alip sonucu yuzdeye cevirir. E
 
 ## Nereden Aktif Ediliyor
 
-Ana senaryo [ArduinoPlayground.ino](/home/nuh/ArdunioProjects/ArduinoPlayground/ArduinoPlayground.ino) icinde `AirQualityAlert airQualityAlert(...)` ile olusturulur ve `loop()` icinde `update()` cagrilir.
+Ana senaryo [ArduinoPlayground.ino](ArduinoPlayground.ino) icinde `AirQualityAlert airQualityAlert(...)` ile olusturulur ve `loop()` icinde `update()` cagrilir.
+
+Bu demoyu secmek icin ayni dosyada su satir aktif olmali:
+
+```cpp
+const DemoMode activeDemo = DEMO_AIR_QUALITY;
+```
