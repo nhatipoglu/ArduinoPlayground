@@ -6,6 +6,8 @@ Bu ozellik HC-SR04 ultrasonik sensor ile mesafe olcup nesne yaklastikca buzzer u
 
 - `DistanceAlert.h`: veri modeli ve sinif arayuzu
 - `DistanceAlert.cpp`: olcum, timeout ve bip araligi mantigi
+- `DistanceDemo.h`: mesafe demosunun ust seviye sinifi
+- `DistanceDemo.cpp`: LCD ve sensor akisini birlestiren uygulama mantigi
 
 ## Donanim
 
@@ -18,6 +20,13 @@ Bu ozellik HC-SR04 ultrasonik sensor ile mesafe olcup nesne yaklastikca buzzer u
 - `alertDistanceCm_ = 10.0` altinda buzzer aktif olur.
 - Mesafe azaldikca bekleme suresi kisalir.
 - Okuma yoksa seri hatta `No measurement` yazilir.
+- LCD varsa mesafe ve durum 16x2 ekranda gosterilir.
+
+## Mimari
+
+- `DistanceAlert`: sensor ve buzzer mantigini tutar.
+- `DistanceDemo`: `DistanceAlert` ve LCD akislarini bir araya getirir.
+- Ana sketch sadece pinleri verip `begin()` ve `update()` cagirir.
 
 ## Not
 

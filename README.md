@@ -12,10 +12,18 @@ ArduinoPlayground/
 |  |- air_quality_alert/
 |  |  |- AirQualityAlert.h
 |  |  |- AirQualityAlert.cpp
+|  |  |- AirQualityDemo.h
+|  |  |- AirQualityDemo.cpp
+|  |  |- README.md
+|  |- air_quality_leds/
+|  |  |- AirQualityLeds.h
+|  |  |- AirQualityLeds.cpp
 |  |  |- README.md
 |  \- distance_alert/
 |     |- DistanceAlert.h
 |     |- DistanceAlert.cpp
+|     |- DistanceDemo.h
+|     |- DistanceDemo.cpp
 |     \- README.md
 |- build/
 \- .vscode/
@@ -56,12 +64,23 @@ Bu mod ul analog hava kalitesi sensorunden veri alip sonucu yuzdeye cevirir, ger
 
 Detaylar icin: `src/air_quality_alert/README.md`
 
+Bu demoda sensor, LED ve LCD akisi `AirQualityDemo` sinifi icinde toparlanir; ana sketch sadece pinleri verip modulu cagirir.
+
+Detaylar icin: `src/air_quality_leds/README.md`
+
 Kisa teknik ozet:
 
 - sensor pini: `A0`
 - buzzer pini: `D9`
+- beyaz LED: `D4`
+- kirmizi LED: `D5`
 - LCD I2C adres denemeleri: `0x27` ve `0x3F`
 - seri hiz: `9600`
+
+LED davranisi:
+
+- hava temizse sadece beyaz LED yanar
+- hava `warningThresholdPercent_` ustune cikinca beyaz LED kapanir ve kirmizi LED yanar
 
 Baglanti tablosu:
 
@@ -69,13 +88,15 @@ Baglanti tablosu:
 | --- | --- |
 | Hava kalitesi sensor cikisi | `A0` |
 | Buzzer | `D9` |
+| Beyaz LED | `D4` |
+| Kirmizi LED | `D5` |
 | I2C LCD SDA | `A4` |
 | I2C LCD SCL | `A5` |
 | LCD adresi | `0x27` veya `0x3F` |
 
 ### Distance Alert
 
-Bu mod ul HC-SR04 ile mesafe olcer ve nesne yaklastikca buzzeri daha sik caldirir. Su an aktif sketch icinde bagli degil ama alternatif demo mantigi olarak tutuluyor.
+Bu mod ul HC-SR04 ile mesafe olcer ve nesne yaklastikca buzzeri daha sik caldirir. Sensor ve LCD akisi `DistanceDemo` sinifi icinde toparlanir; ana sketch sadece pinleri verip modulu cagirir.
 
 Detaylar icin: `src/distance_alert/README.md`
 
